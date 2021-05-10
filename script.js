@@ -17,6 +17,7 @@ export async function script(octokit, repository) {
 
   const owner = repository.owner.login;
   const repo = repository.name;
+  const defaultBranch = repository.default_branch;
   const path = '.github/workflows/update-prettier.yml';
 
   const { data: { sha, content, encoding } } = await octokit
@@ -47,6 +48,7 @@ export async function script(octokit, repository) {
     return;
   }
 
+  const branchName = ref.split('/').slice(-1)[0];
   const {
     data: { commit }
   } = await octokit.request('PUT /repos/{owner}/{repo}/contents/{path}', {
@@ -54,7 +56,7 @@ export async function script(octokit, repository) {
     repo,
     path,
     sha,
-    branch: ref.split('/').slice(-1)[0],
+    branch: branchName,
     content: Buffer.from(contentString.replace('dependabot/npm_and_yarn', 'renovate')).toString('base64'),
     message: `ci: fix branch name for "Update Prettier" workflow
 
@@ -64,4 +66,21 @@ The workflow broke when we switched from Dependabot to Renovate`
   octokit.log.info(
       `${path} updated in ${repository.html_url} via ${commit.html_url}`
   );
+  
+  const { data: pr } = await octokit.request("POST /repos/{owner}/{repo}/pulls", {
+    owner,
+    repo,
+    head: branchName,
+    base: defaultBranch,
+    title: 'ci: fix branch name for "Update Prettier" workflow'
+  });
+  
+  octokit.log.info(`Create Pull Request at ${pr.html_url}`)
+
+  await octokit.request('POST /repos/{owner}/{repo}/issues/{issue_number}/labels', {
+    owner,
+    repo,
+    issue_number: pr.number,
+    labels: ['maintenance']
+  });
 }
