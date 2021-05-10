@@ -12,15 +12,25 @@
     "test": "node script.js"
   },
   "repository": "https://github.com/wolfy1339/octoherd-script-fix-prettier-update",
-  "keywords": ["octoherd-script"],
+  "keywords": [
+    "octoherd-script"
+  ],
   "author": "wolfy1339 <webmaster@wolfy1339.com>",
   "license": "MIT",
   "dependencies": {
     "@octoherd/cli": "^3.3.1"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "@hellomouse/eslint-config-wolfy1339": "^1.3.0",
+    "@types/eslint": "^7.2.10",
+    "@types/node": "^15.0.2",
+    "eslint": "^7.26.0",
+    "eslint-plugin-jsdoc": "^33.1.1"
+  },
   "release": {
-    "branches": ["main"]
+    "branches": [
+      "main"
+    ]
   },
   "publishConfig": {
     "access": "public"
