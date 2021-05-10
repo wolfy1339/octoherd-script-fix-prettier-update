@@ -1,0 +1,28 @@
+{
+  "name": "octoherd-fix-prettier-update-workflow",
+  "version": "0.0.0-development",
+  "type": "module",
+  "exports": "./script.js",
+  "bin": {
+    "octoherd-fix-prettier-update-workflow": "./cli.js"
+  },
+  "description": "An octoherd script to update the `.github/workflows/update-prettier.yml` file with the branch name for renovate",
+  "scripts": {
+    "start": "node cli.js",
+    "test": "node script.js"
+  },
+  "repository": "https://github.com/wolfy1339/octoherd-script-fix-prettier-update",
+  "keywords": ["octoherd-script"],
+  "author": "wolfy1339 <webmaster@wolfy1339.com>",
+  "license": "MIT",
+  "dependencies": {
+    "@octoherd/cli": "^3.3.1"
+  },
+  "devDependencies": {},
+  "release": {
+    "branches": ["main"]
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
