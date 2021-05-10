@@ -1,11 +1,9 @@
-import { Octokit, Repository } from '@octoherd/cli';
-
 /**
  * Updates `.github/workflows/update-prettier.yml` with branch name for renovate.
  * Ignores forks and archived repositories
  *
- * @param {Octokit} octokit
- * @param {Repository} repository
+ * @param {import("@octoherd/cli").Octokit} octokit
+ * @param {import("@octoherd/cli").Repository} repository
  * @return {Promise<void>}
  */
 export async function script(octokit, repository) {

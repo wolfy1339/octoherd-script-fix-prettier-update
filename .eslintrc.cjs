@@ -11,6 +11,7 @@ module.exports = {
     'sourceType': 'module'
   },
   'rules': {
-    'no-unused-vars': 1
+    'no-unused-vars': 1,
+    'valid-jsdoc': 0
   }
 };
