@@ -16,6 +16,7 @@ export async function script(octokit, repository) {
   const owner = repository.owner.login;
   const repo = repository.name;
   const defaultBranch = repository.default_branch;
+  const branchName = 'fix-update-prettier-workflow';
   const path = '.github/workflows/update-prettier.yml';
 
   const { data: { sha, content, encoding } } = await octokit
@@ -46,7 +47,6 @@ export async function script(octokit, repository) {
     return;
   }
 
-  const branchName = ref.split('/').slice(-1)[0];
   const {
     data: { commit }
   } = await octokit.request('PUT /repos/{owner}/{repo}/contents/{path}', {
