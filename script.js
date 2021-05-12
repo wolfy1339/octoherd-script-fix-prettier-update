@@ -19,18 +19,28 @@ export async function script(octokit, repository) {
   const branchName = 'fix-update-prettier-workflow';
   const path = '.github/workflows/update-prettier.yml';
 
-  const { data: { sha, content, encoding } } = await octokit
+  const { data: { content, encoding } } = await octokit
       .request('GET /repos/{owner}/{repo}/contents/{path}', {
         owner,
         repo,
         path
       });
 
-  if (!sha) {
+  if (!content) {
     octokit.log.info(`${path} does not exist in ${repository.html_url}`);
 
     return;
   }
+
+  // Get info on repository branches
+  const { data: branches } = await octokit.request('GET /repos/{owner}/{repo}/branches', {
+    owner,
+    repo,
+    branch: defaultBranch
+  });
+
+  // Get SHA of repository's default branch
+  const sha = branches.filter(branch => branch.name === defaultBranch).map(branch => branch.commit.sha)[0];
 
   const contentString = Buffer.from(content, encoding).toString();
 
