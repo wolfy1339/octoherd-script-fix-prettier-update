@@ -1,4 +1,14 @@
+import prettier from 'prettier';
 import yaml from 'yaml';
+
+/**
+ * Encodes given string into base64
+ * @param {string} string The string to encode into base64
+ * @returns {string} Encoded string in base64
+ */
+function base64Encode(string) {
+  return Buffer.from(string).toString('base64');
+}
 
 /**
  * Updates `.github/workflows/update-prettier.yml` with branch name for renovate.
@@ -79,7 +89,9 @@ export async function script(octokit, repository) {
     path,
     sha,
     branch: branchName,
-    content: Buffer.from(contentString.replace('dependabot/npm_and_yarn', 'renovate')).toString('base64'),
+    content: base64Encode(
+        prettier.format(contentString.replace('dependabot/npm_and_yarn', 'renovate'), { parser: 'yaml' })
+    ),
     message: `ci: fix branch name for "Update Prettier" workflow
 
 The workflow broke when we switched from Dependabot to Renovate`
