@@ -1,16 +1,16 @@
 module.exports = {
-  'env': {
-    'node': true,
-    'es2021': true
+  env: {
+    node: true,
+    es2021: true
   },
-  'extends': [
+  extends: [
     '@hellomouse/wolfy1339'
   ],
-  'parserOptions': {
-    'ecmaVersion': 12,
-    'sourceType': 'module'
+  parserOptions: {
+    ecmaVersion: 12,
+    sourceType: 'module'
   },
-  'rules': {
+  rules: {
     'no-unused-vars': 1,
     'valid-jsdoc': 0
   }
