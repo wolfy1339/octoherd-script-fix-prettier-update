@@ -25,12 +25,14 @@ export async function script(octokit, repository) {
     return;
   }
 
+  // Global variables used throughout the code
   const owner = repository.owner.login;
   const repo = repository.name;
   const defaultBranch = repository.default_branch;
   const branchName = 'fix-update-prettier-workflow';
   const path = '.github/workflows/update-prettier.yml';
 
+  // Get the file contents
   const { data: { content, encoding } } = await octokit
       .request('GET /repos/{owner}/{repo}/contents/{path}', {
         owner,
@@ -81,6 +83,7 @@ export async function script(octokit, repository) {
     }
   }
 
+  // Create commit
   const {
     data: { commit }
   } = await octokit.request('PUT /repos/{owner}/{repo}/contents/{path}', {
@@ -101,6 +104,11 @@ The workflow broke when we switched from Dependabot to Renovate`
       `${path} updated in ${repository.html_url} via ${commit.html_url}`
   );
 
+  //
+  // Pull Request
+  //
+
+  // Create pull request
   const { data: pr } = await octokit.request('POST /repos/{owner}/{repo}/pulls', {
     owner,
     repo,
@@ -111,6 +119,7 @@ The workflow broke when we switched from Dependabot to Renovate`
 
   octokit.log.info(`Create Pull Request at ${pr.html_url}`);
 
+  // Add the "maintenance" label to the pull request
   await octokit.request('POST /repos/{owner}/{repo}/issues/{issue_number}/labels', {
     owner,
     repo,
