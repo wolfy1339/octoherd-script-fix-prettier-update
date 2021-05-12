@@ -41,20 +41,24 @@ export async function script(octokit, repository) {
 
   // Get SHA of repository's default branch
   const sha = branches.filter(branch => branch.name === defaultBranch).map(branch => branch.commit.sha)[0];
+  const branchExists = branches.some(branch => branch.name === branchName);
 
   const contentString = Buffer.from(content, encoding).toString();
 
-  const ref = await octokit.request('POST /repos/{owner}/{repo}/git/refs', {
-    owner,
-    repo,
-    ref: 'refs/heads/fix-update-prettier-workflow',
-    sha
-  }).then(response => response.data.ref, error => null);
+  // Create branch if not present
+  if (!branchExists) {
+    const ref = await octokit.request('POST /repos/{owner}/{repo}/git/refs', {
+      owner,
+      repo,
+      ref: 'refs/heads/fix-update-prettier-workflow',
+      sha
+    }).then(response => response.data.ref);
 
-  if (!ref) {
-    octokit.log.warn(`Error creating branch in ${repository.html_url}`);
+    if (!ref) {
+      octokit.log.warn(`Error creating branch in ${repository.html_url}`);
 
-    return;
+      return;
+    }
   }
 
   const {
