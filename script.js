@@ -1,3 +1,5 @@
+import yaml from 'yaml';
+
 /**
  * Updates `.github/workflows/update-prettier.yml` with branch name for renovate.
  * Ignores forks and archived repositories
@@ -44,6 +46,14 @@ export async function script(octokit, repository) {
   const branchExists = branches.some(branch => branch.name === branchName);
 
   const contentString = Buffer.from(content, encoding).toString();
+  const YAMLFile = yaml.parse(contentString);
+
+  // Check if file needs updating
+  if (YAMLFile.on.push.branches[0] !== 'dependabot/npm_and_yarn/prettier-*') {
+    octokit.log.info('Update prettier workflow already up-to-date in %s', repository.name);
+
+    return;
+  }
 
   // Create branch if not present
   if (!branchExists) {
