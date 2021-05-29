@@ -1,14 +1,7 @@
+import {
+  composeCreateOrUpdateTextFile
+} from '@octokit/plugin-create-or-update-text-file';
 import prettier from 'prettier';
-import yaml from 'yaml';
-
-/**
- * Encodes given string into base64
- * @param {string} string The string to encode into base64
- * @returns {string} Encoded string in base64
- */
-function base64Encode(string) {
-  return Buffer.from(string).toString('base64');
-}
 
 /**
  * Updates `.github/workflows/update-prettier.yml` with branch name for renovate.
@@ -32,20 +25,6 @@ export async function script(octokit, repository) {
   const branchName = 'fix-update-prettier-workflow';
   const path = '.github/workflows/update-prettier.yml';
 
-  // Get the file contents
-  const { data: { content, encoding } } = await octokit
-      .request('GET /repos/{owner}/{repo}/contents/{path}', {
-        owner,
-        repo,
-        path
-      });
-
-  if (!content) {
-    octokit.log.info(`${path} does not exist in ${repository.html_url}`);
-
-    return;
-  }
-
   // Get info on repository branches
   const { data: branches } = await octokit.request('GET /repos/{owner}/{repo}/branches', {
     owner,
@@ -56,16 +35,6 @@ export async function script(octokit, repository) {
   // Get SHA of repository's default branch
   const sha = branches.filter(branch => branch.name === defaultBranch).map(branch => branch.commit.sha)[0];
   const branchExists = branches.some(branch => branch.name === branchName);
-
-  const contentString = Buffer.from(content, encoding).toString();
-  const YAMLFile = yaml.parse(contentString);
-
-  // Check if file needs updating
-  if (YAMLFile.on.push.branches[0] !== 'dependabot/npm_and_yarn/prettier-*') {
-    octokit.log.info('Update prettier workflow already up-to-date in %s', repository.name);
-
-    return;
-  }
 
   // Create branch if not present
   if (!branchExists) {
@@ -83,21 +52,19 @@ export async function script(octokit, repository) {
     }
   }
 
-  // Create commit
-  const {
-    data: { commit }
-  } = await octokit.request('PUT /repos/{owner}/{repo}/contents/{path}', {
+  const { data: { commit }, updated } = await composeCreateOrUpdateTextFile(octokit, {
     owner,
     repo,
     path,
-    sha,
     branch: branchName,
-    content: base64Encode(
-        prettier.format(contentString.replace('dependabot/npm_and_yarn', 'renovate'), { parser: 'yaml' })
-    ),
     message: `ci: fix branch name for "Update Prettier" workflow
 
-The workflow broke when we switched from Dependabot to Renovate`
+The workflow broke when we switched from Dependabot to Renovate`,
+    content: ({ exists, content }) => {
+      if (!exists) return null;
+
+      return prettier.format(content.replace('dependabot/npm_and_yarn', 'renovate'), { parser: 'yaml' });
+    }
   });
 
   octokit.log.info(
