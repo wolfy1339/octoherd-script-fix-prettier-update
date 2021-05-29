@@ -67,30 +67,32 @@ The workflow broke when we switched from Dependabot to Renovate`,
     }
   });
 
-  octokit.log.info(
-      `${path} updated in ${repository.html_url} via ${commit.html_url}`
-  );
+  if (updated) {
+    octokit.log.info(
+        `${path} updated in ${repository.html_url} via ${commit.html_url}`
+    );
 
-  //
-  // Pull Request
-  //
+    //
+    // Pull Request
+    //
 
-  // Create pull request
-  const { data: pr } = await octokit.request('POST /repos/{owner}/{repo}/pulls', {
-    owner,
-    repo,
-    head: branchName,
-    base: defaultBranch,
-    title: 'ci: fix branch name for "Update Prettier" workflow'
-  });
+    // Create pull request
+    const { data: pr } = await octokit.request('POST /repos/{owner}/{repo}/pulls', {
+      owner,
+      repo,
+      head: branchName,
+      base: defaultBranch,
+      title: 'ci: fix branch name for "Update Prettier" workflow'
+    });
 
-  octokit.log.info(`Create Pull Request at ${pr.html_url}`);
+    octokit.log.info(`Create Pull Request at ${pr.html_url}`);
 
-  // Add the "maintenance" label to the pull request
-  await octokit.request('POST /repos/{owner}/{repo}/issues/{issue_number}/labels', {
-    owner,
-    repo,
-    issue_number: pr.number,
-    labels: ['maintenance']
-  });
+    // Add the "maintenance" label to the pull request
+    await octokit.request('POST /repos/{owner}/{repo}/issues/{issue_number}/labels', {
+      owner,
+      repo,
+      issue_number: pr.number,
+      labels: ['maintenance']
+    });
+  }
 }
